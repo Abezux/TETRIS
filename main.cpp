@@ -34,18 +34,27 @@ void drawGrid();
 void drawLockedCells();
 
 void spawnBarBlock(ActiveBlock &block);
-
+void spawnBoxBlock(ActiveBlock &block);
+void spawnRandomBlock(ActiveBlock &block);
 
 void drawBarBlock(ActiveBlock block);
-
+void drawBoxBlock(ActiveBlock block);
 
 bool canBarGoDown(ActiveBlock block);
+bool canBoxGoDown(ActiveBlock block);
+
 bool canBarGoLeft(ActiveBlock block);
+bool canBoxGoLeft(ActiveBlock block);
+
 bool canBarGoRight(ActiveBlock block);
+bool canBoxGoRight(ActiveBlock block);
 
 bool canBarRotate(ActiveBlock block);
+bool canBoxRotate(ActiveBlock block);
 
 void lockBarBlock(ActiveBlock block);
+void lockBoxBlock(ActiveBlock block);
+
 void playGame(ActiveBlock &block, float &fallTime, float fallDelay);
 
 
@@ -55,19 +64,19 @@ int main()
     InitWindow(BOARD_WIDTH +INFO_AREA , BOARD_HEIGHT, "Tetris");
     SetTargetFPS(60);
 
+    
     ActiveBlock block;
     spawnBarBlock(block);
 
     float fallTime = 0.0f;           
-    const float FALL_DELAY = 0.5f;
+    const float FALL_DELAY = 0.2f;
 
     while (!WindowShouldClose())
     {
         BeginDrawing();
         ClearBackground(WHITE);
         playGame(block, fallTime, FALL_DELAY);
-        drawLockedCells();
-        drawGrid();
+        
    
         EndDrawing();
     }
@@ -111,6 +120,18 @@ void lockBarBlock(ActiveBlock block)
         }
     }
 }
+void lockBoxBlock(ActiveBlock block)
+{
+    int x = block.x;
+    int y = block.y;
+    for (int row = 0; row < 2; row++)
+    {
+        for (int col = 0; col < 2; col++)
+        {
+            cellInfo[y + row][x + col] = 1;
+        }
+    }
+}
 void drawGrid()
 {
     for (int y = 0; y < ROWS; y++)
@@ -127,6 +148,8 @@ void drawGrid()
         }
     }
 }
+
+
 void spawnBarBlock(ActiveBlock &block){
     block.block=BarBlock;
     block.orientation= static_cast<Orientation> (GetRandomValue(0,3));
@@ -134,6 +157,24 @@ void spawnBarBlock(ActiveBlock &block){
     block.y=0;
     block.color=SKYBLUE;
 }
+void spawnBoxBlock(ActiveBlock &block){
+    block.block=BoxBlock;
+    block.orientation= Up;
+    block.x=4;
+    block.y=0;
+    block.color=RED;
+}
+void spawnRandomBlock(ActiveBlock &block){
+    int random = GetRandomValue(0, 1); 
+    switch (random)
+    {
+        case 0:spawnBarBlock(block);
+            break;
+        case 1:spawnBoxBlock(block);
+            break;
+    }
+}
+
 void drawBarBlock(ActiveBlock block){
     int x = block.x;
     int y= block.y;
@@ -148,6 +189,26 @@ void drawBarBlock(ActiveBlock block){
         }
     }
 }
+void drawBoxBlock(ActiveBlock block)
+{
+    int x = block.x;
+    int y = block.y;
+
+    for (int row = 0; row < 2; row++)
+    {
+        for (int col = 0; col < 2; col++)
+        {
+            DrawRectangle(
+                (x + col) * CELL_WIDTH,
+                (y + row) * CELL_HEIGHT,
+                CELL_WIDTH,
+                CELL_HEIGHT,
+                block.color
+            );
+        }
+    }
+}
+
 bool canBarGoDown(ActiveBlock block){
     int x=block.x;
     int y=block.y;
@@ -163,6 +224,21 @@ bool canBarGoDown(ActiveBlock block){
     }
     return true;
 }
+bool canBoxGoDown(ActiveBlock block)
+{
+    int x = block.x;
+    int y = block.y;
+
+    if (y + 2 >= ROWS) return false;
+    for (int col = 0; col < 2; col++)
+    {
+        if (cellInfo[y + 2][x + col] == 1)
+            return false;
+    }
+
+    return true;
+}
+
 bool canBarGoLeft(ActiveBlock block){
     int x=block.x;
     int y=block.y;
@@ -180,6 +256,19 @@ bool canBarGoLeft(ActiveBlock block){
     }
     return true;
  }
+bool canBoxGoLeft(ActiveBlock block)
+{
+    int x = block.x;
+    int y = block.y;
+    if (x - 1 < 0) return false;
+    for (int row = 0; row < 2; row++)
+    {
+        if (cellInfo[y + row][x - 1] == 1)
+            return false;
+    }
+
+    return true;
+}
 
 bool canBarGoRight(ActiveBlock block){
     
@@ -201,6 +290,20 @@ bool canBarGoRight(ActiveBlock block){
     return true;
 
 }
+bool canBoxGoRight(ActiveBlock block)
+{
+    int x = block.x;
+    int y = block.y;
+    if (x + 2 >= COLS) return false;
+    for (int row = 0; row < 2; row++)
+    {
+        if (cellInfo[y + row][x + 2] == 1)
+            return false;
+    }
+
+    return true;
+}
+
 bool canBarRotate(ActiveBlock block)
 {
     int x = block.x;
@@ -220,31 +323,111 @@ bool canBarRotate(ActiveBlock block)
     }
     return true;
 }
+bool canBoxRotate(ActiveBlock block)
+{
+    return true;
+}
+
 void playGame(ActiveBlock &block, float &fallTime, float fallDelay){
     
-    if (IsKeyPressed(KEY_LEFT) && canBarGoLeft(block)) block.x--;
-    if (IsKeyPressed(KEY_RIGHT) && canBarGoRight(block)) block.x++;
-    if (IsKeyPressed(KEY_UP) && canBarRotate(block))
+    if (IsKeyPressed(KEY_LEFT)){
+    bool canMove = false;
+
+    switch (block.block){
+        case BarBlock:
+            canMove = canBarGoLeft(block);
+            break;
+        case BoxBlock:
+            canMove = canBoxGoLeft(block);
+            break;
+        default:break;
+    }
+    if (canMove)
+        block.x--;
+}
+if (IsKeyPressed(KEY_RIGHT)){
+    bool canMove = false;
+
+    switch (block.block){
+        case BarBlock:
+            canMove = canBarGoRight(block);
+            break;
+        case BoxBlock:
+            canMove = canBoxGoRight(block);
+            break;
+        default:break;
+    }
+    if (canMove)
+        block.x++;
+}
+
+
+ if (IsKeyPressed(KEY_UP))
+{
+    bool canRotate = false;
+    switch (block.block)
     {
-        if (block.orientation == Up || block.orientation == Down)
-            block.orientation = Right;
-        else
-            block.orientation = Up;
+        case BarBlock:
+            canRotate = canBarRotate(block);
+            break;
+        case BoxBlock:
+            canRotate = canBoxRotate(block);
+            break;
+        default:break;
+        //other blocks later
     }
 
+    if (canRotate)
+    {
+        
+        switch (block.orientation)
+        {
+            case Up: block.orientation = Right; break;
+            case Right: block.orientation = Down; break;
+            case Down: block.orientation = Left; break;
+            case Left: block.orientation = Up; break;
+        }
+    }
+}
     
     fallTime += GetFrameTime();
-    if (fallTime >= fallDelay)
-    {
-        if (canBarGoDown(block))
-            block.y++;              
-        else
-        {
-            lockBarBlock(block);
-            spawnBarBlock(block);   
-        }
-        fallTime = 0.0f;            
+    if (fallTime >= fallDelay){
+        bool canMoveDown = false;
+
+switch (block.block){
+    case BarBlock:
+        canMoveDown = canBarGoDown(block);
+        break;
+    case BoxBlock:
+        canMoveDown = canBoxGoDown(block);
+        break;
+    default:break;
+    //other blocks later
+}
+
+if (canMoveDown)
+{
+    block.y++;
+    
+}
+else
+{
+    switch (block.block){
+        case BarBlock: lockBarBlock(block); break;
+        case BoxBlock: lockBoxBlock(block); break;
+        default:break;
+    }
+    spawnRandomBlock(block); 
+    
+} 
+    fallTime = 0.0f;         
     }
     
-    drawBarBlock(block);
+    switch (block.block){
+    case BarBlock:drawBarBlock(block);break;
+    case BoxBlock:drawBoxBlock(block);break;
+    default:break;
+}
+        drawLockedCells();
+        drawGrid();
 }
