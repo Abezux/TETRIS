@@ -172,6 +172,43 @@ void lockTBlock(ActiveBlock block){
             }break;
 
 }}
+void lockLBlock(ActiveBlock block) {
+
+    int x = block.x;
+    int y = block.y;
+
+    switch(block.orientation) {
+
+        case Up:
+            for(int row = 0; row < 3; row++)
+                cellInfo[y + row][x] = 1;
+
+            cellInfo[y + 2][x + 1] = 1;
+            break;
+
+        case Right:
+            for(int col = 0; col < 3; col++)
+                cellInfo[y][x + col] = 1;
+
+            cellInfo[y + 1][x] = 1;
+            break;
+
+        case Down:
+            for(int row = 0; row < 3; row++)
+                cellInfo[y + row][x + 1] = 1;
+
+            cellInfo[y][x] = 1;
+            break;
+
+        case Left:
+            for(int col = 0; col < 3; col++)
+                cellInfo[y + 1][x + col] = 1;
+
+            cellInfo[y][x + 2] = 1;
+            break;
+    }
+}
+
 void drawGrid()
 {
     for (int y = 0; y < ROWS; y++)
@@ -193,7 +230,7 @@ void drawGrid()
 
 void spawnBarBlock(ActiveBlock &block){
     block.block=BarBlock;
-    block.orientation= static_cast<Orientation> (GetRandomValue(0,3));
+    block.orientation= Up;
     block.x=3;
     block.y=0;
     block.color=SKYBLUE;
@@ -203,18 +240,25 @@ void spawnBoxBlock(ActiveBlock &block){
     block.orientation= Up;
     block.x=4;
     block.y=0;
-    block.color=RED;
+    block.color=YELLOW;
 }
 void spawnTBlock(ActiveBlock &block){
     block.block=TBlock;
-    block.orientation= static_cast<Orientation> (GetRandomValue(0,3));
-    block.x=4;
+    block.orientation= Up;
+    block.x=3;
     block.y=0;
-    block.color=GREEN;
+    block.color=PURPLE;
+}
+void spawnLBlock(ActiveBlock &block){
+ block.block = LBlock;
+    block.orientation = Left;
+    block.x = 3;            
+    block.y = 0;            
+    block.color = ORANGE;
 }
 
 void spawnRandomBlock(ActiveBlock &block){
-    int random = GetRandomValue(0, 2); 
+    int random = GetRandomValue(0, 3); 
     switch (random)
     {
         case 0:spawnBarBlock(block);
@@ -222,6 +266,8 @@ void spawnRandomBlock(ActiveBlock &block){
         case 1:spawnBoxBlock(block);
             break;
         case 2:spawnTBlock(block);
+            break;
+        case 3:spawnLBlock(block);
             break;
     }
 }
@@ -284,6 +330,42 @@ void drawTBlock(ActiveBlock block){
                    DrawRectangle((x+1) * CELL_WIDTH, (y+row) * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, block.color);
             }break;
 }}
+void drawLBlock(ActiveBlock block){
+    int x = block.x;
+    int y = block.y;
+
+    switch(block.orientation) {
+        case Up:
+
+        for(int row=0;row<3;row++){
+            DrawRectangle(x * CELL_WIDTH, (y+row) * CELL_HEIGHT,CELL_WIDTH, CELL_HEIGHT, block.color);
+        }
+        DrawRectangle((x + 1) * CELL_WIDTH, (y + 2) * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, block.color); 
+        break;
+        case Right:
+
+         for(int col=0;col<3;col++){
+            DrawRectangle((x + col) * CELL_WIDTH, y * CELL_HEIGHT,CELL_WIDTH, CELL_HEIGHT, block.color);
+        }
+        DrawRectangle(x * CELL_WIDTH,       (y + 1) * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, block.color);
+        break;
+        case Down:
+
+        for(int row=0;row<3;row++){
+            DrawRectangle((x + 1) * CELL_WIDTH, (y + row) * CELL_HEIGHT,CELL_WIDTH, CELL_HEIGHT, block.color);
+        }
+        DrawRectangle(x * CELL_WIDTH, y * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, block.color);
+        break;
+        case Left: 
+
+        for(int col=0;col<3;col++){
+            DrawRectangle((x + col) * CELL_WIDTH, (y + 1) * CELL_HEIGHT,CELL_WIDTH, CELL_HEIGHT, block.color);
+        }
+        DrawRectangle((x + 2) * CELL_WIDTH, y * CELL_HEIGHT,CELL_WIDTH, CELL_HEIGHT, block.color);
+        break;
+    }
+
+}
 
 bool canBarGoDown(ActiveBlock block){
     int x=block.x;
@@ -344,6 +426,39 @@ bool canTGoDown(ActiveBlock block){
             }
         return true;
     }
+bool canLGoDown(ActiveBlock block){
+    int x = block.x;
+    int y = block.y;
+
+    switch (block.orientation) {
+        case Up:
+            if (y + 3 >= ROWS) return false;
+            if (cellInfo[y + 3][x] == 1) return false;
+            if (cellInfo[y + 3][x + 1] == 1) return false;
+            break;
+        case Right:
+            if (y + 2 >= ROWS) return false;
+            if (cellInfo[y + 2][x] == 1) return false;     
+            if (cellInfo[y + 1][x + 1] == 1) return false; 
+            if (cellInfo[y + 1][x + 2] == 1) return false; 
+            break;
+
+        case Down:
+            if (y + 3 >= ROWS) return false;
+            if (cellInfo[y + 1][x] == 1) return false;     
+            if (cellInfo[y + 3][x + 1] == 1) return false;
+            break;
+
+        case Left:
+            if (y + 2 >= ROWS) return false;
+            if (cellInfo[y + 2][x] == 1) return false;
+            if (cellInfo[y + 2][x + 1] == 1) return false;
+            if (cellInfo[y + 2][x + 2] == 1) return false;
+            break;
+    }
+return true;
+    }
+
 bool canBarGoLeft(ActiveBlock block){
     int x=block.x;
     int y=block.y;
@@ -404,7 +519,37 @@ bool canTGoLeft(ActiveBlock block){
 
     return true; 
 }
+bool canLGoLeft(ActiveBlock block){
+    int x = block.x;
+    int y = block.y;
 
+    if (x - 1 < 0) return false; 
+
+    switch (block.orientation) {
+        case Up:
+            if (cellInfo[y][x - 1] == 1) return false;
+            if (cellInfo[y + 1][x - 1] == 1) return false;
+            if (cellInfo[y + 2][x - 1] == 1) return false;
+            break;
+
+        case Right:
+            if (cellInfo[y][x - 1] == 1) return false;
+            if (cellInfo[y + 1][x - 1] == 1) return false;
+            break;
+
+        case Down:
+            if (cellInfo[y][x - 1] == 1) return false;     
+            if (cellInfo[y + 1][x] == 1) return false;     
+            if (cellInfo[y + 2][x] == 1) return false;     
+            break;
+
+        case Left:
+            if (cellInfo[y][x + 1] == 1) return false;     
+            if (cellInfo[y + 1][x - 1] == 1) return false; 
+            break;
+    }
+    return true;
+}
 
 bool canBarGoRight(ActiveBlock block){
     
@@ -470,6 +615,39 @@ bool canTGoRight(ActiveBlock block){
 
     return true; 
 }
+bool canLGoRight(ActiveBlock block){
+    int x = block.x;
+    int y = block.y;
+
+    switch (block.orientation) {
+        case Up:
+            if (x + 2 >= COLS) return false; 
+            if (cellInfo[y][x + 1] == 1) return false;
+            if (cellInfo[y + 1][x + 1] == 1) return false;
+            if (cellInfo[y + 2][x + 2] == 1) return false; 
+            break;
+
+        case Right:
+            if (x + 3 >= COLS) return false;
+            if (cellInfo[y][x + 3] == 1) return false;
+            if (cellInfo[y + 1][x + 1] == 1) return false;
+            break;
+
+        case Down:
+            if (x + 2 >= COLS) return false;
+            if (cellInfo[y][x + 2] == 1) return false;
+            if (cellInfo[y + 1][x + 2] == 1) return false;
+            if (cellInfo[y + 2][x + 2] == 1) return false;
+            break;
+
+        case Left:
+            if (x + 3 >= COLS) return false;
+            if (cellInfo[y][x + 3] == 1) return false;
+            if (cellInfo[y + 1][x + 3] == 1) return false;
+            break;
+    }
+    return true;
+}
 
 
 bool canBarRotate(ActiveBlock block)
@@ -523,6 +701,48 @@ bool canTRotate(ActiveBlock block) {
 
     return true;
 }
+bool canLRotate(ActiveBlock block){
+    int x = block.x;
+    int y = block.y;
+    switch (block.orientation) {
+        case Left:
+            if (y + 2 >= ROWS || x + 1 >= COLS) return false;
+            if (cellInfo[y][x] == 1) return false;
+            if (cellInfo[y + 1][x] == 1) return false;
+            if (cellInfo[y + 2][x] == 1) return false;
+            if (cellInfo[y + 2][x + 1] == 1) return false;
+            break;
+
+        case Up:
+            if (y + 1 >= ROWS || x + 2 >= COLS) return false;
+            if (cellInfo[y][x] == 1) return false;
+            if (cellInfo[y][x + 1] == 1) return false;
+            if (cellInfo[y][x + 2] == 1) return false;
+            if (cellInfo[y + 1][x] == 1) return false;
+            break;
+
+        case Right:
+            if (y + 2 >= ROWS || x + 1 >= COLS) return false;
+            if (cellInfo[y][x] == 1) return false;
+            if (cellInfo[y][x + 1] == 1) return false;
+            if (cellInfo[y + 1][x + 1] == 1) return false;
+            if (cellInfo[y + 2][x + 1] == 1) return false;
+            break;
+
+        case Down:
+           
+            if (y + 1 >= ROWS || x + 2 >= COLS) return false;
+            if (cellInfo[y + 1][x] == 1) return false;
+            if (cellInfo[y + 1][x + 1] == 1) return false;
+            if (cellInfo[y + 1][x + 2] == 1) return false;
+            if (cellInfo[y][x + 2] == 1) return false;
+            break;
+    }
+
+    return true;
+}
+
+
 void playGame(ActiveBlock &block, float &fallTime, float fallDelay){
     
     if (IsKeyPressed(KEY_LEFT)){
@@ -537,6 +757,9 @@ void playGame(ActiveBlock &block, float &fallTime, float fallDelay){
             break;
         case TBlock:
             canMove= canTGoLeft(block);
+            break;
+        case LBlock:
+            canMove= canLGoLeft(block);
             break;
         default:break;
     }
@@ -555,6 +778,9 @@ if (IsKeyPressed(KEY_RIGHT)){
             break;
         case TBlock:
              canMove= canTGoRight(block);
+            break;
+        case LBlock:
+             canMove= canLGoRight(block);
             break;
         default:break;
     }
@@ -576,6 +802,9 @@ if (IsKeyPressed(KEY_RIGHT)){
             break;
         case TBlock:
              canRotate= canTRotate(block);
+            break;
+        case LBlock:
+             canRotate= canLRotate(block);
             break;
         default:break;
         //other blocks later
@@ -608,6 +837,9 @@ switch (block.block){
     case TBlock:
         canMoveDown= canTGoDown(block);
         break;
+    case LBlock:
+        canMoveDown= canLGoDown(block);
+        break;
     default:break;
     //other blocks later
 }
@@ -623,6 +855,7 @@ else
         case BarBlock: lockBarBlock(block); break;
         case BoxBlock: lockBoxBlock(block); break;
         case TBlock: lockTBlock(block);break;
+        case LBlock: lockLBlock(block);break;
         default:break;
     }
     spawnRandomBlock(block); 
@@ -635,6 +868,7 @@ else
     case BarBlock:drawBarBlock(block);break;
     case BoxBlock:drawBoxBlock(block);break;
     case TBlock:drawTBlock(block);break;
+    case LBlock:drawLBlock(block);break;
     default:break;
 }
         drawLockedCells();
