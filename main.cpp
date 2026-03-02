@@ -27,7 +27,8 @@ const Color GRID_LINE_COLOR = LIGHTGRAY;
 const Color LOCKED_CELL_COLOR = DARKGRAY;
 
 
-
+int score = 0;
+bool isGameOver = false;
 int cellInfo[ROWS][COLS] = {0};
 
 void drawGrid();
@@ -97,7 +98,7 @@ int main()
     spawnRandomBlock(block);
 
     float fallTime = 0.0f;           
-    const float FALL_DELAY = 0.3f;
+    const float FALL_DELAY = 0.1f;
 
     while (!WindowShouldClose())
     {
@@ -380,6 +381,9 @@ void spawnRandomBlock(ActiveBlock &block){
         case 6:spawnSBlock(block);
             break;
     }
+     // If the spot we just spawned in is already occupied, Game Over!
+    if (cellInfo[block.y][block.x] == 1) {
+        isGameOver = true;}
 }
 
 void drawBarBlock(ActiveBlock block){
@@ -1213,9 +1217,56 @@ bool canSRotate(ActiveBlock block) {
     }
     return true;
 }
+void checkAndClearRows() {
+    for (int y = ROWS - 1; y >= 0; y--) {
+        bool isFull = true;
+        for (int x = 0; x < COLS; x++) {
+            if (cellInfo[y][x] == 0) {
+                isFull = false;
+                break;
+            }
+        }
+
+        if (isFull) {
+            // Shift all rows above this one down
+            for (int ty = y; ty > 0; ty--) {
+                for (int tx = 0; tx < COLS; tx++) {
+                    cellInfo[ty][tx] = cellInfo[ty - 1][tx];
+                }
+            }
+            // Clear the very top row
+            for (int tx = 0; tx < COLS; tx++) cellInfo[0][tx] = 0;
+            
+            score += 100; // Increase score
+            y++; // Check the same row index again because a new row shifted down
+        }
+    }
+}
+void resetGame(ActiveBlock &block) {
+    // Clear the board
+    for (int y = 0; y < ROWS; y++) {
+        for (int x = 0; x < COLS; x++) cellInfo[y][x] = 0;
+    }
+    score = 0;
+    isGameOver = false;
+    spawnRandomBlock(block);
+}
 
 void playGame(ActiveBlock &block, float &fallTime, float fallDelay){
     
+    if (isGameOver) {
+        int centerY = BOARD_HEIGHT / 2;
+        int lineSpace = 50; // space between lines
+        DrawText("GAME OVER",50, centerY - lineSpace, 40, RED);
+        DrawText(TextFormat("Your score: %i", score),80, centerY, 30, YELLOW);
+        DrawText("Press ENTER to Restart",40, centerY + lineSpace, 20, WHITE);
+        
+        if (IsKeyPressed(KEY_ENTER)) {
+            resetGame(block);
+        }
+        return; // Stop running the rest of the logic
+    }
+
     if (IsKeyPressed(KEY_LEFT)){
     bool canMove = false;
 
@@ -1364,6 +1415,7 @@ else
         case SBlock: lockSBlock(block);break;
         default:break;
     }
+    checkAndClearRows();
     spawnRandomBlock(block); 
     
 } 
@@ -1382,4 +1434,7 @@ else
 }
         drawLockedCells();
         drawGrid();
+        // Draw Score in the Info Area
+        DrawText("SCORE:", BOARD_WIDTH + 20, 50, 20, WHITE);
+        DrawText(TextFormat("%i", score), BOARD_WIDTH + 20, 80, 30, YELLOW);
 }
