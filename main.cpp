@@ -22,12 +22,13 @@ const int CELL_WIDTH = BOARD_WIDTH / COLS;
 const int CELL_HEIGHT = BOARD_HEIGHT / ROWS;
 const int INFO_AREA=250;
 
-const Color WINDOW_BG_COLOR = BLACK;
-const Color GRID_LINE_COLOR = LIGHTGRAY;
+const Color WINDOW_BG_COLOR = WHITE;
+const Color GRID_LINE_COLOR = GRAY;
 const Color LOCKED_CELL_COLOR = DARKGRAY;
 
 
 int score = 0;
+int highScore = 0;
 bool isGameOver = false;
 int cellInfo[ROWS][COLS] = {0};
 
@@ -98,15 +99,13 @@ int main()
     spawnRandomBlock(block);
 
     float fallTime = 0.0f;           
-    const float FALL_DELAY = 0.1f;
+    const float FALL_DELAY = 0.3f;
 
     while (!WindowShouldClose())
     {
         BeginDrawing();
         ClearBackground(WINDOW_BG_COLOR);
         playGame(block, fallTime, FALL_DELAY);
-        
-   
         EndDrawing();
     }
 
@@ -381,7 +380,7 @@ void spawnRandomBlock(ActiveBlock &block){
         case 6:spawnSBlock(block);
             break;
     }
-     // If the spot we just spawned in is already occupied, Game Over!
+
     if (cellInfo[block.y][block.x] == 1) {
         isGameOver = true;}
 }
@@ -990,7 +989,7 @@ bool canJGoRight(ActiveBlock block) {
             if (x + 3 >= COLS) return false;
             for (int col = 0; col < 3; col++)
                 if (cellInfo[y + 2][x + col] == 1) return false;
-            if (cellInfo[y + 1][x + 2] == 1) return false;
+            if (cellInfo[y + 2][x + 3] == 1) return false;
             break;
 
         case Down:
@@ -1228,22 +1227,22 @@ void checkAndClearRows() {
         }
 
         if (isFull) {
-            // Shift all rows above this one down
-            for (int ty = y; ty > 0; ty--) {
-                for (int tx = 0; tx < COLS; tx++) {
-                    cellInfo[ty][tx] = cellInfo[ty - 1][tx];
+            for (int row = y; row > 0; row--) {
+                for (int col = 0; col < COLS; col++) {
+                    cellInfo[row][col] = cellInfo[row - 1][col];
                 }
             }
-            // Clear the very top row
-            for (int tx = 0; tx < COLS; tx++) cellInfo[0][tx] = 0;
+            for (int col = 0; col < COLS; col++) cellInfo[0][col] = 0;
             
-            score += 100; // Increase score
-            y++; // Check the same row index again because a new row shifted down
+            score += 100; 
+            if (score > highScore) {
+                highScore = score;
+            }
+            y++; 
         }
     }
 }
 void resetGame(ActiveBlock &block) {
-    // Clear the board
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0; x < COLS; x++) cellInfo[y][x] = 0;
     }
@@ -1256,15 +1255,16 @@ void playGame(ActiveBlock &block, float &fallTime, float fallDelay){
     
     if (isGameOver) {
         int centerY = BOARD_HEIGHT / 2;
-        int lineSpace = 50; // space between lines
+        int lineSpace = 100; 
         DrawText("GAME OVER",50, centerY - lineSpace, 40, RED);
-        DrawText(TextFormat("Your score: %i", score),80, centerY, 30, YELLOW);
-        DrawText("Press ENTER to Restart",40, centerY + lineSpace, 20, WHITE);
+        DrawText(TextFormat("Your score: %i", score),80, centerY, 30, BLACK);
+        DrawText(TextFormat("Highscore: %i", highScore), 80, centerY + 20, 30, GOLD);
+        DrawText("Press ENTER to Restart",40, centerY + lineSpace, 20, BLACK);
         
         if (IsKeyPressed(KEY_ENTER)) {
             resetGame(block);
         }
-        return; // Stop running the rest of the logic
+        return; 
     }
 
     if (IsKeyPressed(KEY_LEFT)){
@@ -1369,9 +1369,12 @@ if (IsKeyPressed(KEY_RIGHT)){
         }
     }
 }
-    
+float currentDelay = fallDelay;
+    if (IsKeyDown(KEY_DOWN)) {
+    currentDelay = 0.05f; 
+}
     fallTime += GetFrameTime();
-    if (fallTime >= fallDelay){
+    if (fallTime >= currentDelay){
         bool canMoveDown = false;
 
 switch (block.block){
@@ -1397,7 +1400,6 @@ switch (block.block){
         canMoveDown= canSGoDown(block);
         break;
 }
-
 if (canMoveDown)
 {
     block.y++;
@@ -1434,7 +1436,8 @@ else
 }
         drawLockedCells();
         drawGrid();
-        // Draw Score in the Info Area
-        DrawText("SCORE:", BOARD_WIDTH + 20, 50, 20, WHITE);
-        DrawText(TextFormat("%i", score), BOARD_WIDTH + 20, 80, 30, YELLOW);
+        DrawText("SCORE:", BOARD_WIDTH + 20, 50, 20, BLACK);
+        DrawText(TextFormat("%i", score), BOARD_WIDTH + 20, 80, 30, SKYBLUE);
+        DrawText("HIGH SCORE", BOARD_WIDTH + 30, 140, 20, LIGHTGRAY);
+        DrawText(TextFormat("%i", highScore), BOARD_WIDTH + 30, 170, 30, GOLD);
 }
