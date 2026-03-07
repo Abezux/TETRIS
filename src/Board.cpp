@@ -27,6 +27,12 @@ bool Board::isValidPosition(const std::vector<Position>& cells) const {
     return true;
 }
 
+bool Board::isTouchingFloor(const Piece& piece) const {
+    Piece testPiece = piece;
+    testPiece.move(1, 0); // Move 1 step down
+    return !isValidPosition(testPiece);
+}
+
 bool Board::lockPiece(const Piece& piece) {
     bool toppedOut = false;
     for (const auto& pos : piece.getCellPositions()) {
