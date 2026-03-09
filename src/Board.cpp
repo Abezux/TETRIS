@@ -146,17 +146,20 @@ void Board::drawGhostPiece(const Piece& activePiece) const {
     auto cells = activePiece.getCellPositionsAt(ghostPos, activePiece.getRotation());
     Color color = GetBlockColor(activePiece.getType());
 
+    // Pulsing alpha for ghost piece
+    float alphaPulse = 0.4f + 0.15f * sinf(GetTime() * 4.0f);
+
     for (const auto& pos : cells) {
         if (pos.row >= 0) {
             int posX = BOARD_OFFSET_X + pos.col * CELL_SIZE;
             int posY = BOARD_OFFSET_Y + pos.row * CELL_SIZE;
 
-            // Translucent outline ghost piece
+            // Translucent glowing outline ghost piece
             DrawRectangleLinesEx(
                 Rectangle{ (float)posX + 2, (float)posY + 2, (float)CELL_SIZE - 4, (float)CELL_SIZE - 4 },
-                2.0f, ColorAlpha(color, 0.6f)
+                2.5f, ColorAlpha(color, alphaPulse + 0.2f)
             );
-            DrawRectangle(posX + 4, posY + 4, CELL_SIZE - 8, CELL_SIZE - 8, ColorAlpha(color, 0.15f));
+            DrawRectangle(posX + 4, posY + 4, CELL_SIZE - 8, CELL_SIZE - 8, ColorAlpha(color, alphaPulse * 0.4f));
         }
     }
 }
