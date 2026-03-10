@@ -14,6 +14,7 @@ public:
     bool isValidPosition(const std::vector<Position>& cells) const;
 
     bool isTouchingFloor(const Piece& piece) const;
+    int hardDropPiece(Piece& piece);
     bool lockPiece(const Piece& piece);
     int checkAndClearLines(std::vector<int>& clearedRowIndices);
     

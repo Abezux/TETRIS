@@ -33,6 +33,17 @@ bool Board::isTouchingFloor(const Piece& piece) const {
     return !isValidPosition(testPiece);
 }
 
+int Board::hardDropPiece(Piece& piece) {
+    int dropDistance = 0;
+    while (isValidPosition(piece.getCellPositions())) {
+        piece.move(1, 0);
+        dropDistance++;
+    }
+    piece.move(-1, 0); // Backtrack to last valid position
+    dropDistance--;
+    return (dropDistance > 0) ? dropDistance : 0;
+}
+
 bool Board::lockPiece(const Piece& piece) {
     bool toppedOut = false;
     for (const auto& pos : piece.getCellPositions()) {
