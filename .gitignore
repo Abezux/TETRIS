@@ -11,14 +11,7 @@
 *.lib
 game
 main
-
-# Debug and symbol files
-*.dSYM/
-*.dsym
-*.pdb
-*.ilk
-*.idb
-*.map
+highscore.txt
 
 # Build directories
 build/
@@ -53,8 +46,5 @@ Thumbs.db
 *.pem
 *.key
 
-# Package & dependencies
-node_modules/
-
-# Local template assets
+# Local preview
 preview.jpg

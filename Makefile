@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -Iinclude -Ivendor/raylib/include
-LDFLAGS = -Lvendor/raylib/lib -lraylib -L/usr/lib/x86_64-linux-gnu -l:libGL.so.1 -lm -lpthread -ldl -lrt -lX11
+LDFLAGS = vendor/raylib/lib/libraylib.a -L/usr/lib/x86_64-linux-gnu -l:libGL.so.1 -lm -lpthread -ldl -lrt -lX11
 
 SRC_DIR = src
 INC_DIR = include

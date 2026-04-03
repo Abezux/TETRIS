@@ -18,6 +18,7 @@ void ScoreManager::reset() {
 }
 
 void ScoreManager::addLinesCleared(int lines, bool isTSpin, bool hardDropped) {
+    (void)hardDropped;
     if (lines <= 0 && !isTSpin) {
         comboCount = -1; // Reset combo if no line cleared
         return;
