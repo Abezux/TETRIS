@@ -1,3 +1,60 @@
+# Compiled binaries and libraries
 *.exe
-*.dsym
+*.out
+*.app
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.a
+*.lib
+game
 main
+
+# Debug and symbol files
+*.dSYM/
+*.dsym
+*.pdb
+*.ilk
+*.idb
+*.map
+
+# Build directories
+build/
+bin/
+obj/
+out/
+dist/
+
+# IDE and Editor files
+.vscode/
+*.code-workspace
+.idea/
+*.suo
+*.user
+*.userosv
+*.sln.docstates
+
+# Operating System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# Environment variables & secrets
+.env
+.env.*
+*.env
+*.pem
+*.key
+
+# Package & dependencies
+node_modules/
+
+# Local template assets
+preview.jpg
